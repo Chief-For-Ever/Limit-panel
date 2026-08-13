@@ -260,11 +260,17 @@
     screenPanel.classList.remove('open');
   });
 
-  document.getElementById('submit-code').addEventListener('click', function(){
+document.getElementById('submit-code').addEventListener('click', function(){
     var val = document.getElementById('code-input').value.trim();
     var status = document.getElementById('code-status');
     if (!val) { status.textContent = 'کد را وارد کنید.'; return; }
-    status.textContent = 'این بخش به‌زودی فعال می‌شود.';
+    status.textContent = 'در حال بررسی...';
+    if (tg && tg.sendData) {
+      try { tg.sendData(JSON.stringify({ action: 'submit_code', code: val })); } catch(e) {}
+    }
+    setTimeout(function(){
+      if (tg && tg.close) { tg.close(); }
+    }, 500);
   });
 
   document.getElementById('btn-message').addEventListener('click', function(){
