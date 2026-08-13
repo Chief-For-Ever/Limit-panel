@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>حد | پنل دانش‌آموز</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#0c0817;
+    --bg-panel:#160f28;
+    --panel-border:#2c2049;
+    --purple-deep:#37205c;
+    --purple-mid:#5b3695;
+    --purple-glow:#8b5cf6;
+    --metal-silver:#9aa3b0;
+    --metal-light:#d9dce3;
+    --brass:#b3915a;
+    --brass-light:#dcc189;
+    --text-primary:#f2eef7;
+    --text-dim:#a79bc4;
+    --danger:#c0525a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Vazirmatn', sans-serif;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(139,92,246,0.16), transparent 55%),
+      var(--bg-void);
+    color:var(--text-primary);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:linear-gradient(180deg, transparent 0%, rgba(139,92,246,0.05) 50%, transparent 100%);
+    background-size:100% 220px;
+    animation:sweep 7s linear infinite;
+    pointer-events:none;
+    z-index:0;
+  }
+  @keyframes sweep{
+    0%{background-position:0 -220px;}
+    100%{background-position:0 100vh;}
+  }
+  .app{
+    position:relative; z-index:1;
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    padding:calc(28px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom));
+    display:flex; flex-direction:column;
+  }
+  .emblem-wrap{ display:flex; flex-direction:column; align-items:center; margin-bottom:22px; }
+  .emblem{ width:64px; height:64px; margin-bottom:12px; filter:drop-shadow(0 0 14px rgba(139,92,246,0.45)); }
+  .wordmark{
+    font-size:28px; font-weight:800; letter-spacing:1px;
+    background:linear-gradient(180deg, var(--metal-light), var(--metal-silver));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .org-name{ font-size:13px; color:var(--text-dim); margin-top:2px; font-weight:500; }
+  .eyebrow{
+    font-size:10px; letter-spacing:3px; color:var(--brass-light);
+    text-transform:uppercase; margin-top:6px; font-weight:600;
+  }
+  .status-divider{
+    display:flex; align-items:center; gap:10px;
+    margin:20px 0 26px;
+  }
+  .status-divider .line{ flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--panel-border), transparent); }
+  .status-divider .dot{ width:6px; height:6px; background:var(--brass); transform:rotate(45deg); flex-shrink:0; }
+  .cards{ display:flex; flex-direction:column; gap:16px; flex:1; }
+  .card{
+    position:relative;
+    background:linear-gradient(155deg, var(--bg-panel) 0%, #120c22 100%);
+    border:1px solid var(--panel-border);
+    padding:20px 18px;
+    display:flex; align-items:center; gap:16px;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .card:active{ transform:scale(0.98); border-color:var(--purple-glow); }
+  .card::before, .card::after,
+  .card .corner-br, .card .corner-bl{
+    content:""; position:absolute; width:14px; height:14px; pointer-events:none;
+  }
+  .card::before{ top:6px; right:6px; border-top:2px solid var(--brass); border-right:2px solid var(--brass); }
+  .card::after{ top:6px; left:6px; border-top:2px solid var(--brass); border-left:2px solid var(--brass); }
+  .card .corner-br{ bottom:6px; right:6px; border-bottom:2px solid var(--brass); border-right:2px solid var(--brass); }
+  .card .corner-bl{ bottom:6px; left:6px; border-bottom:2px solid var(--brass); border-left:2px solid var(--brass); }
+  .card-icon{
+    width:46px; height:46px; flex-shrink:0;
+    background:linear-gradient(155deg, var(--purple-mid), var(--purple-deep));
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(139,92,246,0.4);
+  }
+  .card-icon svg{ width:22px; height:22px; stroke:var(--metal-light); }
+  .card-body{ flex:1; min-width:0; }
+  .card-tag{ font-size:10px; letter-spacing:2.5px; color:var(--brass-light); font-weight:700; margin-bottom:4px; }
+  .card-title{ font-size:17px; font-weight:700; color:var(--text-primary); margin-bottom:3px; }
+  .card-sub{ font-size:12.5px; color:var(--text-dim); }
+  .card-arrow{ flex-shrink:0; opacity:.6; }
+  .card-arrow svg{ width:16px; height:16px; stroke:var(--metal-silver); }
+  .footer{ text-align:center; margin-top:30px; }
+  .motto{ font-size:11px; letter-spacing:3px; color:var(--text-dim); font-weight:600; }
+  .motto b{ color:var(--brass-light); }
+  .screen{
+    position:fixed; inset:0; z-index:5;
+    background:var(--bg-void);
+    padding:calc(20px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));
+    display:flex; flex-direction:column;
+    transform:translateX(110%);
+    transition:transform .28s ease;
+  }
+  .screen.open{ transform:translateX(0); }
+  .screen-header{ display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+  .back-btn{
+    width:36px; height:36px; border:1px solid var(--panel-border);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .back-btn svg{ width:18px; height:18px; stroke:var(--metal-light); }
+  .screen-title{ font-size:16px; font-weight:700; }
+  .field-label{ font-size:12.5px; color:var(--text-dim); margin-bottom:20px; line-height:1.9; }
+  .code-input{
+    width:100%; background:var(--bg-panel); border:1px solid var(--panel-border);
+    color:var(--text-primary); font-family:'Vazirmatn',sans-serif;
+    font-size:20px; font-weight:700; letter-spacing:6px; text-align:center;
+    padding:16px 10px; margin-bottom:16px; outline:none;
+  }
+  .code-input:focus{ border-color:var(--purple-glow); }
+  .submit-btn{
+    background:linear-gradient(155deg, var(--purple-mid), var(--purple-deep));
+    border:1px solid rgba(139,92,246,0.5);
+    color:var(--text-primary); font-family:'Vazirmatn',sans-serif;
+    font-size:14.5px; font-weight:700; padding:15px; width:100%; cursor:pointer;
+  }
+  .submit-btn:active{ opacity:.85; }
+  .status-msg{ margin-top:16px; font-size:12.5px; color:var(--brass-light); text-align:center; min-height:18px; }
+  .connecting{
+    position:fixed; inset:0; z-index:10;
+    background:rgba(12,8,23,0.92);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .connecting.show{ opacity:1; pointer-events:all; }
+  .pulse{
+    width:12px; height:12px; background:var(--purple-glow); border-radius:50%;
+    animation:pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{ transform:scale(1); opacity:1;} 50%{ transform:scale(1.6); opacity:.4;} }
+  .connecting-text{ font-size:13px; color:var(--text-dim); letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="emblem-wrap">
+    <svg class="emblem" viewBox="0 0 100 100" fill="none">
+      <path d="M50 6 L86 20 V50 C86 74 70 88 50 96 C30 88 14 74 14 50 V20 Z" stroke="url(#g1)" stroke-width="3"/>
+      <path d="M50 20 L50 78" stroke="#5b3695" stroke-width="1.5"/>
+      <path d="M22 32 C34 28 42 34 50 44 C58 34 66 28 78 32" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M18 46 C32 42 42 46 50 56 C58 46 68 42 82 46" stroke="url(#g2)" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="100" y2="100">
+          <stop offset="0" stop-color="#d9dce3"/><stop offset="1" stop-color="#8b5cf6"/>
+        </linearGradient>
+        <linearGradient id="g2" x1="0" y1="0" x2="100" y2="0">
+          <stop offset="0" stop-color="#b3915a"/><stop offset="1" stop-color="#d9dce3"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="wordmark">حـد</div>
+    <div class="org-name">گروه آموزشی حد</div>
+    <div class="eyebrow">LIMIT EDUCATIONAL GROUP</div>
+  </div>
+
+  <div class="status-divider">
+    <div class="line"></div>
+    <div class="dot"></div>
+    <div class="line"></div>
+  </div>
+
+  <div class="cards">
+    <div class="card" id="btn-panel">
+      <span class="corner-br"></span><span class="corner-bl"></span>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="1"/>
+          <circle cx="8.5" cy="11" r="2"/>
+          <path d="M5 16c0-1.7 1.6-3 3.5-3s3.5 1.3 3.5 3"/>
+          <path d="M14 9h5M14 13h5"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">ACCESS TERMINAL</div>
+        <div class="card-title">پنل کاربری</div>
+        <div class="card-sub">ورود با کد اختصاصی و مشاهده محتوا</div>
+      </div>
+      <div class="card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg>
+      </div>
+    </div>
+
+    <div class="card" id="btn-message">
+      <span class="corner-br"></span><span class="corner-bl"></span>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.5 8.5 0 01-8.5 8.5 8.4 8.4 0 01-4-1L3 20l1-4.5A8.5 8.5 0 1121 11.5z"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">COMMS LINK</div>
+        <div class="card-title">ارسال پیام</div>
+        <div class="card-sub">خط مستقیم برای ارتباط با ستاد</div>
+      </div>
+      <div class="card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="motto">پایـداری <b>·</b> نبـرد</div>
+  </div>
+</div>
+
+<div class="screen" id="screen-panel">
+  <div class="screen-header">
+    <div class="back-btn" id="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+    </div>
+    <div class="screen-title">پنل کاربری</div>
+  </div>
+  <div class="field-label">برای دسترسی به محتوای آموزشی خود، کد اختصاصی‌ای که در اختیارتان قرار گرفته را وارد کنید.</div>
+  <input class="code-input" id="code-input" type="text" inputmode="text" placeholder="کد شما" maxlength="12" autocomplete="off">
+  <button class="submit-btn" id="submit-code">تأیید کد</button>
+  <div class="status-msg" id="code-status"></div>
+</div>
+
+<div class="connecting" id="connecting">
+  <div class="pulse"></div>
+  <div class="connecting-text">در حال اتصال به ستاد...</div>
+</div>
+
+<script>
+  var tg = window.Telegram ? window.Telegram.WebApp : null;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  var screenPanel = document.getElementById('screen-panel');
+  document.getElementById('btn-panel').addEventListener('click', function(){
+    screenPanel.classList.add('open');
+  });
+  document.getElementById('back-btn').addEventListener('click', function(){
+    screenPanel.classList.remove('open');
+  });
+
+  document.getElementById('submit-code').addEventListener('click', function(){
+    var val = document.getElementById('code-input').value.trim();
+    var status = document.getElementById('code-status');
+    if (!val) { status.textContent = 'کد را وارد کنید.'; return; }
+    status.textContent = 'این بخش به‌زودی فعال می‌شود.';
+  });
+
+  document.getElementById('btn-message').addEventListener('click', function(){
+    var overlay = document.getElementById('connecting');
+    overlay.classList.add('show');
+    if (tg && tg.sendData) {
+      try { tg.sendData(JSON.stringify({ action: 'start_message' })); } catch(e) {}
+    }
+    setTimeout(function(){
+      if (tg && tg.close) { tg.close(); }
+    }, 700);
+  });
+</script>
+</body>
+</html>
